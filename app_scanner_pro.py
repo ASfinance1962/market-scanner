@@ -1,15 +1,16 @@
-
 import streamlit as st
 import yfinance as yf
 import pandas as pd
 import ta
 
-# Configuração da Página Comercial
-st.set_page_config(page_title="MarketScanner Pro | Ações, Dividendos & Cripto", layout="wide")
+# Configuração da página
+st.set_page_config(
+    page_title="MarketScanner Pro",
+    page_icon="📊",
+    layout="wide"
+)
 
-# ==========================================
-# AVISO LEGAL OBRIGATÓRIO (COMPLIANCE)
-# ==========================================
+# Aviso Legal (Compliance e Transparência)
 st.warning(
     "⚠️ **AVISO LEGAL:** Esta plataforma é uma ferramenta exclusivamente tecnológica e educacional de triagem estatística. "
     "Os filtros são configurados livremente pelo próprio usuário. Nenhuma informação exibida constitui recomendação, "
@@ -17,156 +18,167 @@ st.warning(
 )
 
 st.title("📊 MarketScanner Pro — Rastreador Quantitativo Multi-Ativos")
-st.markdown("Configure seus critérios técnicos, fundamentalistas e de volatilidade na barra lateral para filtrar **Ações, ETFs e Criptomoedas**.")
+st.markdown("Analise rapidamente ações globais e criptomoedas com base em indicadores técnicos objetivos.")
 
-# ==========================================
-# BARRA LATERAL: PARÂMETROS DO USUÁRIO
-# ==========================================
-st.sidebar.header("⚙️ Filtros de Mercado")
+# Barra Lateral (Configurações do Usuário)
+st.sidebar.header("⚙️ Configurações da Triagem")
 
-ativos_input = st.sidebar.text_area(
-    "Ativos para monitorar (separados por vírgula):",
-    value="EDP.LS, GALP.LS, PETR4.SA, BBAS3.SA, AAPL, KO, BTC-USD, ETH-USD, SOL-USD",
-    help="Use .LS para Lisboa, .SA para Brasil e -USD para Criptomoedas."
+mercados = {
+    "Euronext Lisboa (PSI)": ["EDP.LS", "GALP.LS", "JMT.LS", "BCP.LS", "NOS.LS", "SON.LS", "REN.LS", "ALTR.LS", "NVG.LS", "COR.LS"],
+    "EUA (Tech & Blue Chips)": ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "JPM", "V", "KO"],
+    "Brasil (B3)": ["PETR4.SA", "VALE3.SA", "ITUB4.SA", "BBDC4.SA", "BBAS3.SA", "WEGE3.SA", "RENT3.SA", "ABEV3.SA"],
+    "Criptomoedas": ["BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "XRP-USD", "ADA-USD", "LINK-USD", "AVAX-USD"],
+    "Lista Personalizada": []
+}
+
+mercado_escolhido = st.sidebar.selectbox("Selecione o Mercado:", list(mercados.keys()))
+
+if mercado_escolhido == "Lista Personalizada":
+    ativos_texto = st.sidebar.text_area(
+        "Digite os códigos (tickers) separados por vírgula:",
+        value="EDP.LS, AAPL, PETR4.SA, BTC-USD"
+    )
+    lista_ativos = [x.strip().upper() for x in ativos_texto.split(",") if x.strip()]
+else:
+    lista_ativos = mercados[mercado_escolhido]
+
+st.sidebar.subheader("📐 Parâmetros Técnicos")
+rsi_sobrevenda = st.sidebar.slider("Limite RSI Sobre-venda:", 15, 45, 35)
+rsi_sobrecompra = st.sidebar.slider("Limite RSI Sobre-compra:", 55, 85, 70)
+
+perfil_risco = st.sidebar.selectbox(
+    "Multiplicador ATR (Gestão de Risco):",
+    ["Conservador (Stop 1.5x | Alvo 2.0x)", "Moderado (Stop 2.0x | Alvo 3.0x)", "Agressivo (Stop 2.5x | Alvo 4.5x)"]
 )
 
-st.sidebar.subheader("📈 Indicadores Fundamentalistas (Ações)")
-dy_minimo = st.sidebar.slider("Dividend Yield Mínimo (%):", min_value=0.0, max_value=15.0, value=4.0, step=0.5)
-pl_maximo = st.sidebar.slider("P/L Máximo (Preço/Lucro):", min_value=5.0, max_value=60.0, value=20.0, step=1.0)
-roe_minimo = st.sidebar.slider("ROE Mínimo (%):", min_value=0.0, max_value=40.0, value=12.0, step=1.0)
+if "Conservador" in perfil_risco:
+    mult_stop, mult_alvo = 1.5, 2.0
+elif "Moderado" in perfil_risco:
+    mult_stop, mult_alvo = 2.0, 3.0
+else:
+    mult_stop, mult_alvo = 2.5, 4.5
 
-st.sidebar.subheader("📉 Indicadores Técnicos & Proteção")
-rsi_maximo = st.sidebar.slider("RSI Máximo (Filtro de Sobrecompra):", min_value=30, max_value=90, value=70, step=5)
-queda_alerta = st.sidebar.slider("Alerta de Queda Diária (%):", min_value=-15.0, max_value=-1.0, value=-4.0, step=0.5)
-exigir_tendencia_alta = st.sidebar.checkbox("Exigir Preço acima da Média de 200 dias", value=True)
-
-# ==========================================
-# MOTOR COM CACHE INTELIGENTE (ESCALABILIDADE)
-# ==========================================
-# Guarda os dados na memória por 300 segundos (5 min) para suportar centenas de usuários simultâneos
-@st.cache_data(ttl=300, show_spinner=False)
-def obter_dados_ativo(ticker):
-    ativo = yf.Ticker(ticker)
-    dados = ativo.history(period="1y", interval="1d")
-    info = ativo.info
-    return dados, info
-
-def analisar_ativo(ticker, dy_min, pl_max, roe_min, rsi_max, queda_max, exigir_sma200):
-    ticker_limpo = ticker.strip().upper()
-    try:
-        dados, info = obter_dados_ativo(ticker_limpo)
-        if len(dados) < 200:
-            return None
-
-        # Identifica automaticamente se é Criptomoeda
-        is_cripto = ticker_limpo.endswith("-USD") or ticker_limpo.endswith("-EUR") or info.get("quoteType") == "CRYPTOCURRENCY"
-
-        # Cálculos Técnicos
-        dados['SMA_200'] = ta.trend.sma_indicator(dados['Close'], window=200)
-        dados['RSI'] = ta.momentum.rsi(dados['Close'], window=14)
-        dados['ATR'] = ta.volatility.average_true_range(dados['High'], dados['Low'], dados['Close'], window=14)
-
-        ultimo = dados.iloc[-1]
-        penultimo = dados.iloc[-2]
-
-        preco = ultimo['Close']
-        var_dia = ((preco - penultimo['Close']) / penultimo['Close']) * 100
-        sma200 = ultimo['SMA_200']
-        rsi = ultimo['RSI']
-        atr = ultimo['ATR']
-
-        # Avaliação Técnica e de Volatilidade (Aplica-se a Ações e Cripto)
-        criterio_rsi = rsi <= rsi_max
-        criterio_tendencia = (preco > sma200) if exigir_sma200 else True
-        alerta_volatilidade = var_dia <= queda_max
-
-        if is_cripto:
-            # Criptomoedas não têm Dividendos, P/L ou ROE
-            dy_texto, pl_texto, roe_texto = "N/A (Cripto)", "N/A", "N/A"
-            criterio_fundamental = True
-            tipo_ativo = "🪙 Cripto"
-        else:
-            tipo_ativo = "🏢 Ação/ETF"
-            # Extração segura de Dividend Yield
-            dy_raw = info.get("dividendYield", 0) or 0
-            dy = dy_raw * 100 if dy_raw < 1 else dy_raw
-
-            # Extração segura de P/L (Trailing PE)
-            pl = info.get("trailingPE", 0) or 0
-
-            # Extração segura de ROE (Return on Equity)
-            roe_raw = info.get("returnOnEquity", 0) or 0
-            roe = roe_raw * 100
-
-            dy_texto = f"{dy:.2f}%"
-            pl_texto = f"{pl:.1f}x" if pl > 0 else "N/A"
-            roe_texto = f"{roe:.1f}%" if roe != 0 else "N/A"
-
-            # Validação dos critérios fundamentalistas
-            passou_dy = dy >= dy_min
-            passou_pl = (0 < pl <= pl_max) if pl_max > 0 else True
-            passou_roe = roe >= roe_min
-            criterio_fundamental = passou_dy and passou_pl and passou_roe
-
-        # Veredito Objetivo
-        if alerta_volatilidade:
-            status = "🚨 Alerta de Queda Brusca"
-        elif criterio_fundamental and criterio_rsi and criterio_tendencia:
-            status = "✅ Atende aos Critérios"
-        else:
-            status = "➖ Fora dos Parâmetros"
-
-        return {
-            "Ativo": ticker_limpo,
-            "Tipo": tipo_ativo,
-            "Preço": round(preco, 2),
-            "Var. Dia (%)": round(var_dia, 2),
-            "Div. Yield": dy_texto,
-            "P/L": pl_texto,
-            "ROE": roe_texto,
-            "RSI (14)": round(rsi, 1),
-            "Margem Volat. (2x ATR)": round(preco - (2 * atr), 2),
-            "Status": status
-        }
-    except Exception:
-        return None
-
-# ==========================================
-# EXECUÇÃO E INTERFACE DO USUÁRIO
-# ==========================================
-if st.button("🔍 Executar Triagem Completa"):
-    lista_tickers = [t for t in ativos_input.split(",") if t.strip()]
+# Função de análise técnica
+def analisar_ativos(tickers):
     resultados = []
+    barra_progresso = st.progress(0)
+    total = len(tickers)
 
-    with st.spinner("Processando indicadores técnicos, fundamentalistas e cripto..."):
-        for t in lista_tickers:
-            res = analisar_ativo(
-                t, dy_minimo, pl_maximo, roe_minimo,
-                rsi_maximo, queda_alerta, exigir_tendencia_alta
-            )
-            if res:
-                resultados.append(res)
+    for i, ticker in enumerate(tickers):
+        try:
+            df = yf.download(ticker, period="6mo", interval="1d", progress=False)
+            if df.empty or len(df) < 55:
+                barra_progresso.progress((i + 1) / total)
+                continue
 
-    if resultados:
-        df_resultados = pd.DataFrame(resultados)
-        st.dataframe(df_resultados, use_container_width=True, hide_index=True)
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
 
-        # Métricas rápidas no topo
-        total_aprovados = len([r for r in resultados if "✅" in r["Status"]])
-        total_alertas = len([r for r in resultados if "🚨" in r["Status"]])
-        
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Ativos Analisados", len(resultados))
-        col2.metric("Dentro dos Critérios", total_aprovados)
-        col3.metric("Alertas de Queda", total_alertas)
+            close = df["Close"].squeeze()
+            high = df["High"].squeeze()
+            low = df["Low"].squeeze()
 
-        # Exportação CSV
-        csv = df_resultados.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="📥 Exportar Tabela para Excel (CSV)",
-            data=csv,
-            file_name="relatorio_marketscanner.csv",
-            mime="text/csv"
-        )
+            # Indicadores Técnicos
+            rsi = ta.momentum.RSIIndicator(close=close, window=14).rsi().iloc[-1]
+            mme20 = ta.trend.EMAIndicator(close=close, window=20).ema_indicator().iloc[-1]
+            mme50 = ta.trend.EMAIndicator(close=close, window=50).ema_indicator().iloc[-1]
+            atr = ta.volatility.AverageTrueRange(high=high, low=low, close=close, window=14).average_true_range().iloc[-1]
+
+            preco_atual = float(close.iloc[-1])
+            preco_anterior = float(close.iloc[-2])
+            variacao_pct = ((preco_atual - preco_anterior) / preco_anterior) * 100
+
+            # Classificação estatística neutra
+            if rsi <= rsi_sobrevenda and preco_atual > mme50:
+                status = "🟢 Confluência Alta (Pullback)"
+                stop = preco_atual - (atr * mult_stop)
+                alvo = preco_atual + (atr * mult_alvo)
+            elif rsi <= rsi_sobrevenda:
+                status = "🟡 RSI em Sobre-venda"
+                stop = preco_atual - (atr * mult_stop)
+                alvo = preco_atual + (atr * mult_alvo)
+            elif rsi >= rsi_sobrecompra:
+                status = "🔴 RSI em Sobre-compra"
+                stop = preco_atual + (atr * mult_stop)
+                alvo = preco_atual - (atr * mult_alvo)
+            elif preco_atual > mme20 and mme20 > mme50:
+                status = "🔵 Tendência de Alta Ativa"
+                stop = preco_atual - (atr * mult_stop)
+                alvo = preco_atual + (atr * mult_alvo)
+            else:
+                status = "⚪ Neutro / Consolidação"
+                stop = preco_atual - (atr * mult_stop)
+                alvo = preco_atual + (atr * mult_alvo)
+
+            resultados.append({
+                "Ativo": ticker,
+                "Preço Atual": round(preco_atual, 2),
+                "Var. Dia (%)": round(variacao_pct, 2),
+                "RSI (14)": round(float(rsi), 1),
+                "MME 20": round(float(mme20), 2),
+                "MME 50": round(float(mme50), 2),
+                "Leitura Estatística": status,
+                "Ref. Stop (ATR)": round(float(stop), 2),
+                "Ref. Alvo (ATR)": round(float(alvo), 2)
+            })
+        except Exception:
+            pass
+
+        barra_progresso.progress((i + 1) / total)
+
+    barra_progresso.empty()
+    return pd.DataFrame(resultados)
+
+# Guardar estado na sessão para manter tabela ao trocar o gráfico
+if "df_resultados" not in st.session_state:
+    st.session_state["df_resultados"] = pd.DataFrame()
+
+if st.button("🔍 Executar Triagem Completa", type="primary"):
+    if not lista_ativos:
+        st.warning("Adicione pelo menos um código de ativo na barra lateral.")
     else:
-       st.error("Nenhum ativo válido encontrado. Verifique se os códigos (tickers) estão corretos.")
+        with st.spinner("A processar cotações e indicadores técnicos..."):
+            st.session_state["df_resultados"] = analisar_ativos(lista_ativos)
+
+df_res = st.session_state["df_resultados"]
+
+if not df_res.empty:
+    st.subheader(f"📋 Resultados da Triagem — {mercado_escolhido}")
+    st.dataframe(df_res, use_container_width=True, hide_index=True)
+
+    # Secção de Gráfico Visual
+    st.markdown("---")
+    st.subheader("📈 Visualização Gráfica do Ativo (6 Meses)")
+
+    ativo_escolhido = st.selectbox(
+        "Selecione um ativo da tabela acima para visualizar o preço e as médias móveis:",
+        df_res["Ativo"].tolist()
+    )
+
+    if ativo_escolhido:
+        dados_grafico = yf.download(ativo_escolhido, period="6mo", interval="1d", progress=False)
+        if not dados_grafico.empty:
+            if isinstance(dados_grafico.columns, pd.MultiIndex):
+                dados_grafico.columns = dados_grafico.columns.get_level_values(0)
+
+            dados_grafico["Preço Fecho"] = dados_grafico["Close"]
+            dados_grafico["MME 20"] = dados_grafico["Close"].ewm(span=20, adjust=False).mean()
+            dados_grafico["MME 50"] = dados_grafico["Close"].ewm(span=50, adjust=False).mean()
+
+            st.line_chart(
+                dados_grafico[["Preço Fecho", "MME 20", "MME 50"]],
+                color=["#00FFAA", "#FFA500", "#FF4B4B"]
+            )
+else:
+    st.info("Clique em **Executar Triagem Completa** acima para carregar os dados do mercado selecionado.")
+
+# Área de Feedback para Testadores
+st.markdown("---")
+with st.expander("💬 Enviar Opinião ou Sugestão (Versão Beta)"):
+    st.write("A sua opinião ajuda a melhorar esta ferramenta:")
+    st.text_area("O que achou da clareza dos indicadores ou que ativo gostaria de ver incluído?", key="feedback_box")
+    if st.button("Enviar Sugestão"):
+        if st.session_state.get("feedback_box", "").strip():
+            st.success("Obrigado pelo seu feedback! A sua sugestão foi registada.")
+        else:
+            st.warning("Escreva uma mensagem antes de clicar em enviar.")
