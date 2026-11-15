@@ -169,4 +169,4 @@ if st.button("🔍 Executar Triagem Completa"):
             mime="text/csv"
         )
     else:
-        st.error("Nenhum ativo válido encontrado. Verifique se os códigos (ticker
+       st.error("Nenhum ativo válido encontrado. Verifique se os códigos (tickers) estão corretos.")
