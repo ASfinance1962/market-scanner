@@ -10,7 +10,24 @@ st.set_page_config(
     layout="wide"
 )
 
-# Aviso Legal (Compliance e Transparência)
+# Ocultar o botão "Gerenciar aplicativo" e o rodapé padrão do Streamlit
+st.markdown(
+    """
+    <style>
+    [data-testid="manage-app-button"],
+    [data-testid="stAppDeployButton"],
+    .stAppDeployButton,
+    footer,
+    #MainMenu {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Aviso Legal (Compliance e Transparência - CMVM / ESMA)
 st.warning(
     "⚠️ **AVISO LEGAL:** Esta plataforma é uma ferramenta exclusivamente tecnológica e educacional de triagem estatística. "
     "Os filtros são configurados livremente pelo próprio usuário. Nenhuma informação exibida constitui recomendação, "
@@ -18,13 +35,13 @@ st.warning(
 )
 
 st.title("📊 MarketScanner Pro — Rastreador Quantitativo Multi-Ativos")
-st.markdown("Analise rapidamente ações globais e criptomoedas com base em indicadores técnicos objetivos.")
+st.markdown("Analise rapidamente ações globais e criptomoedas com base em indicadores técnicos objetivos (dados diários para fins exclusivamente educacionais).")
 
 # Barra Lateral (Configurações do Usuário)
 st.sidebar.header("⚙️ Configurações da Triagem")
 
 mercados = {
-    "Euronext Lisboa (PSI)": ["EDP.LS", "GALP.LS", "JMT.LS", "BCP.LS", "NOS.LS", "SON.LS", "REN.LS", "ALTR.LS", "NVG.LS", "COR.LS"],
+    "Euronext Lisboa (PSI)": ["EDP.LS", "GALP.LS", "JMT.LS", "BCP.LS", "NOS.LS", "SON.LS", "RENE.LS", "ALTR.LS", "NVG.LS", "COR.LS"],
     "EUA (Tech & Blue Chips)": ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "JPM", "V", "KO"],
     "Brasil (B3)": ["PETR4.SA", "VALE3.SA", "ITUB4.SA", "BBDC4.SA", "BBAS3.SA", "WEGE3.SA", "RENT3.SA", "ABEV3.SA"],
     "Criptomoedas": ["BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "XRP-USD", "ADA-USD", "LINK-USD", "AVAX-USD"],
@@ -112,8 +129,8 @@ def analisar_ativos(tickers):
 
             resultados.append({
                 "Ativo": ticker,
-                "Preço Atual": round(preco_atual, 2),
-                "Var. Dia (%)": round(variacao_pct, 2),
+                "Preço Ref.": round(preco_atual, 2),
+                "Var. (%)": round(variacao_pct, 2),
                 "RSI (14)": round(float(rsi), 1),
                 "MME 20": round(float(mme20), 2),
                 "MME 50": round(float(mme50), 2),
@@ -137,14 +154,14 @@ if st.button("🔍 Executar Triagem Completa", type="primary"):
     if not lista_ativos:
         st.warning("Adicione pelo menos um código de ativo na barra lateral.")
     else:
-        with st.spinner("A processar cotações e indicadores técnicos..."):
+        with st.spinner("A processar dados e indicadores técnicos..."):
             st.session_state["df_resultados"] = analisar_ativos(lista_ativos)
 
 df_res = st.session_state["df_resultados"]
 
 if not df_res.empty:
     st.subheader(f"📋 Resultados da Triagem — {mercado_escolhido}")
-    st.dataframe(df_res, use_container_width=True, hide_index=True)
+    st.dataframe(df_res, width="stretch", hide_index=True)
 
     # Secção de Gráfico Visual
     st.markdown("---")
@@ -176,9 +193,17 @@ else:
 st.markdown("---")
 with st.expander("💬 Enviar Opinião ou Sugestão (Versão Beta)"):
     st.write("A sua opinião ajuda a melhorar esta ferramenta:")
+    st.selectbox(
+        "Quanto consideraria justo pagar por mês por um software de triagem destes com dados em tempo real licenciados?",
+        ["Prefiro não responder", "Até 9€ / mês", "Entre 10€ e 19€ / mês", "Entre 20€ e 39€ / mês", "Mais de 40€ / mês"],
+        key="preco_box"
+    )
     st.text_area("O que achou da clareza dos indicadores ou que ativo gostaria de ver incluído?", key="feedback_box")
     if st.button("Enviar Sugestão"):
         if st.session_state.get("feedback_box", "").strip():
             st.success("Obrigado pelo seu feedback! A sua sugestão foi registada.")
         else:
             st.warning("Escreva uma mensagem antes de clicar em enviar.")
+
+# Rodapé de Transparência de Dados
+st.caption("Nota de transparência: Os dados de mercado exibidos nesta versão beta
