@@ -206,4 +206,4 @@ with st.expander("💬 Enviar Opinião ou Sugestão (Versão Beta)"):
             st.warning("Escreva uma mensagem antes de clicar em enviar.")
 
 # Rodapé de Transparência de Dados
-st.caption("Nota de transparência: Os dados de mercado exibidos nesta versão beta
+st.caption("Nota de transparência: Os dados de mercado exibidos nesta versão beta são fornecidos para fins exclusivamente informativos e educacionais, podendo apresentar atraso (delay) padrão de 15 a 20 minutos.")
