@@ -226,7 +226,7 @@ with st.expander("💬 Enviar Opinião ou Sugestão (Versão Beta)"):
                     if resposta.status_code == 200:
                         st.success("✅ Obrigado! A sua resposta foi enviada com sucesso.")
                     else:
-                        st.error("❌ Ocorreu um problema ao enviar. Por favor, tente novamente.")
+                        st.error(f"❌ Erro {resposta.status_code}: {resposta.text}")
                 except Exception:
                     st.error("❌ Erro de ligação ao enviar o formulário.")
             else:
