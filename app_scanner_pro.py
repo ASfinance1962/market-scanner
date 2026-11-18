@@ -194,16 +194,19 @@ else:
 st.markdown("---")
 with st.expander("💬 Enviar Opinião ou Sugestão (Versão Beta)"):
     st.write("A sua opinião ajuda a melhorar esta ferramenta:")
-    with st.form("form_feedback_beta"):
+    with st.form("form_feedback_beta_v2"):
         preco_justo = st.selectbox(
             "Quanto consideraria justo pagar por mês por um software de triagem destes com dados em tempo real licenciados?",
-            ["Prefiro não responder", "Até 9€ / mês", "Entre 10€ e 19€ / mês", "Entre 20€ e 39€ / mês", "Mais de 40€ / mês"]
+            ["Prefiro não responder", "Até 9€ / mês", "Entre 10€ e 19€ / mês", "Entre 20€ e 39€ / mês", "Mais de 40€ / mês"],
+            key="fb_preco_justo"
         )
         sugestao = st.text_area(
-            "O que achou da clareza dos indicadores ou que ativo gostaria de ver incluído?"
+            "O que achou da clareza dos indicadores ou que ativo gostaria de ver incluído?",
+            key="fb_sugestao_texto"
         )
         email_testador = st.text_input(
-            "O seu e-mail (opcional, caso queira receber novidades ou acesso antecipado):"
+            "O seu e-mail (opcional, caso queira receber novidades ou acesso antecipado):",
+            key="fb_email_contacto"
         )
         
         btn_enviar = st.form_submit_button("Enviar Feedback", type="primary")
@@ -227,33 +230,4 @@ with st.expander("💬 Enviar Opinião ou Sugestão (Versão Beta)"):
                 except Exception:
                     st.error("❌ Erro de ligação ao enviar o formulário.")
             else:
-                st.warning("⚠️ Por favor, selecione um valor ou escreva uma sugestão antes de enviar.")
-                sugestao = st.text_area(
-            "O que achou da clareza dos indicadores ou que ativo gostaria de ver incluído?"
-        )
-        email_testador = st.text_input(
-            "O seu e-mail (opcional, caso queira receber novidades ou acesso antecipado):"
-        )
-        
-        btn_enviar = st.form_submit_button("Enviar Feedback", type="primary")
-        
-        if btn_enviar:
-            if sugestao.strip() or preco_justo != "Prefiro não responder":
-                try:
-                    resposta = requests.post(
-                        "https://formspree.io",
-                        data={
-                            "Preco_Considerado_Justo": preco_justo,
-                            "Opiniao_Sugestao": sugestao,
-                            "Email_Testador": email_testador
-                        },
-                        headers={"Accept": "application/json"}
-                    )
-                    if resposta.status_code == 200:
-                        st.success("✅ Obrigado! A sua resposta foi enviada com sucesso.")
-                    else:
-                        st.error("❌ Ocorreu um problema ao enviar. Por favor, tente novamente.")
-                except Exception:
-                    st.error("❌ Erro de ligação ao enviar o formulário.")
-            else:
-                st.warning("⚠️ Por favor, selecione um valor ou escreva uma sugestão antes de enviar.")        
+                st.warning("⚠️ Por favor, selecione um valor ou escreva uma sugestão antes de enviar.")      
