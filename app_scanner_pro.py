@@ -2,6 +2,7 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 import ta
+import requests
 
 # Configuração da página
 st.set_page_config(
@@ -193,17 +194,66 @@ else:
 st.markdown("---")
 with st.expander("💬 Enviar Opinião ou Sugestão (Versão Beta)"):
     st.write("A sua opinião ajuda a melhorar esta ferramenta:")
-    st.selectbox(
-        "Quanto consideraria justo pagar por mês por um software de triagem destes com dados em tempo real licenciados?",
-        ["Prefiro não responder", "Até 9€ / mês", "Entre 10€ e 19€ / mês", "Entre 20€ e 39€ / mês", "Mais de 40€ / mês"],
-        key="preco_box"
-    )
-    st.text_area("O que achou da clareza dos indicadores ou que ativo gostaria de ver incluído?", key="feedback_box")
-    if st.button("Enviar Sugestão"):
-        if st.session_state.get("feedback_box", "").strip():
-            st.success("Obrigado pelo seu feedback! A sua sugestão foi registada.")
-        else:
-            st.warning("Escreva uma mensagem antes de clicar em enviar.")
-
-# Rodapé de Transparência de Dados
-st.caption("Nota de transparência: Os dados de mercado exibidos nesta versão beta são fornecidos para fins exclusivamente informativos e educacionais, podendo apresentar atraso (delay) padrão de 15 a 20 minutos.")
+    with st.form("form_feedback_beta"):
+        preco_justo = st.selectbox(
+            "Quanto consideraria justo pagar por mês por um software de triagem destes com dados em tempo real licenciados?",
+            ["Prefiro não responder", "Até 9€ / mês", "Entre 10€ e 19€ / mês", "Entre 20€ e 39€ / mês", "Mais de 40€ / mês"]
+        )
+        sugestao = st.text_area(
+            "O que achou da clareza dos indicadores ou que ativo gostaria de ver incluído?"
+        )
+        email_testador = st.text_input(
+            "O seu e-mail (opcional, caso queira receber novidades ou acesso antecipado):"
+        )
+        
+        btn_enviar = st.form_submit_button("Enviar Feedback", type="primary")
+        
+        if btn_enviar:
+            if sugestao.strip() or preco_justo != "Prefiro não responder":
+                try:
+                    resposta = requests.post(
+                        "https://formspree.io",
+                        data={
+                            "Preco_Considerado_Justo": preco_justo,
+                            "Opiniao_Sugestao": sugestao,
+                            "Email_Testador": email_testador
+                        },
+                        headers={"Accept": "application/json"}
+                    )
+                    if resposta.status_code == 200:
+                        st.success("✅ Obrigado! A sua resposta foi enviada com sucesso.")
+                    else:
+                        st.error("❌ Ocorreu um problema ao enviar. Por favor, tente novamente.")
+                except Exception:
+                    st.error("❌ Erro de ligação ao enviar o formulário.")
+            else:
+                st.warning("⚠️ Por favor, selecione um valor ou escreva uma sugestão antes de enviar.")
+                sugestao = st.text_area(
+            "O que achou da clareza dos indicadores ou que ativo gostaria de ver incluído?"
+        )
+        email_testador = st.text_input(
+            "O seu e-mail (opcional, caso queira receber novidades ou acesso antecipado):"
+        )
+        
+        btn_enviar = st.form_submit_button("Enviar Feedback", type="primary")
+        
+        if btn_enviar:
+            if sugestao.strip() or preco_justo != "Prefiro não responder":
+                try:
+                    resposta = requests.post(
+                        "https://formspree.io",
+                        data={
+                            "Preco_Considerado_Justo": preco_justo,
+                            "Opiniao_Sugestao": sugestao,
+                            "Email_Testador": email_testador
+                        },
+                        headers={"Accept": "application/json"}
+                    )
+                    if resposta.status_code == 200:
+                        st.success("✅ Obrigado! A sua resposta foi enviada com sucesso.")
+                    else:
+                        st.error("❌ Ocorreu um problema ao enviar. Por favor, tente novamente.")
+                except Exception:
+                    st.error("❌ Erro de ligação ao enviar o formulário.")
+            else:
+                st.warning("⚠️ Por favor, selecione um valor ou escreva uma sugestão antes de enviar.")        
