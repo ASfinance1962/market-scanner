@@ -215,7 +215,7 @@ with st.expander("💬 Enviar Opinião ou Sugestão (Versão Beta)"):
             if sugestao.strip() or preco_justo != "Prefiro não responder":
                 try:
                     resposta = requests.post(
-                        "https://formspree.io",
+                       "https://formspree.io",
                         data={
                             "Preco_Considerado_Justo": preco_justo,
                             "Opiniao_Sugestao": sugestao,
