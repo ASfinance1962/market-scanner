@@ -164,8 +164,31 @@ df_res = st.session_state["df_resultados"]
 
 if not df_res.empty:
     st.subheader(f"📋 Resultados da Triagem — {mercado_escolhido}")
+
+    # Cartões de Resumo (KPIs)
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Total Analisado", f"{len(df_res)} ativos")
+    em_alta = len(df_res[df_res["Leitura Estatística"].str.contains("Alta|Confluência")])
+    col2.metric("Em Alta / Confluência", f"{em_alta} ativos")
+    em_sobrevenda = len(df_res[df_res["Leitura Estatística"].str.contains("Sobre-venda")])
+    col3.metric("Em Sobre-venda (RSI)", f"{em_sobrevenda} ativos")
+
     st.dataframe(df_res, width="stretch", hide_index=True)
 
+    # Botão para descarregar CSV
+    csv = df_res.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="📥 Descarregar Tabela (CSV / Excel)",
+        data=csv,
+        file_name=f"triagem_{mercado_escolhido.split()[0].lower()}.csv",
+        mime="text/csv"
+    )
+    # Gráfico de Barras de Variação Diária
+    st.markdown("---")
+    st.subheader("📊 Comparação de Variação Diária (%)")
+    st.bar_chart(df_res.set_index("Ativo")["Var. (%)"])
+
+    
     # Secção de Gráfico Visual
     st.markdown("---")
     st.subheader("📈 Visualização Gráfica do Ativo (6 Meses)")
