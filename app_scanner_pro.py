@@ -42,10 +42,12 @@ st.markdown("Analise rapidamente ações globais e criptomoedas com base em indi
 st.sidebar.header("⚙️ Configurações da Triagem")
 
 mercados = {
-    "Euronext Lisboa (PSI)": ["EDP.LS", "GALP.LS", "JMT.LS", "BCP.LS", "NOS.LS", "SON.LS", "RENE.LS", "ALTR.LS", "NVG.LS", "COR.LS"],
+     "Euronext Lisboa (PSI)": ["EDP.LS", "GALP.LS", "JMT.LS", "BCP.LS", "NOS.LS", "SON.LS", "RENE.LS", "ALTR.LS", "NVG.LS", "COR.LS"],
     "EUA (Tech & Blue Chips)": ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "JPM", "V", "KO"],
     "Brasil (B3)": ["PETR4.SA", "VALE3.SA", "ITUB4.SA", "BBDC4.SA", "BBAS3.SA", "WEGE3.SA", "RENT3.SA", "ABEV3.SA"],
     "Criptomoedas": ["BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "XRP-USD", "ADA-USD", "LINK-USD", "AVAX-USD"],
+    "ETFs Globais": ["SPY", "QQQ", "IWM", "EEM", "VWCE.DE", "IWDA.AS"],
+    "Matérias-Primas": ["GC=F", "SI=F", "CL=F", "NG=F", "HG=F"],
     "Lista Personalizada": []
 }
 
