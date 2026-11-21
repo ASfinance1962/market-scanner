@@ -144,6 +144,9 @@ def analisar_ativos(tickers):
                 "RSI (14)": round(float(rsi), 1),
                 "MME 20": round(float(mme20), 2),
                 "MME 50": round(float(mme50), 2),
+                "MME 200": round(float(mme200), 2),
+                "MACD (Hist.)": macd_str,
+                "Bollinger": bb_str,
                 "Leitura Estatística": status,
                 "Ref. Stop (ATR)": round(float(stop), 2),
                 "Ref. Alvo (ATR)": round(float(alvo), 2)
