@@ -219,7 +219,7 @@ if not df_res.empty:
             dados_grafico["MME 50"] = dados_grafico["Close"].ewm(span=50, adjust=False).mean()
             dados_grafico["MME 200"] = dados_grafico["Close"].ewm(span=200, adjust=False).mean()
 
-           dados_grafico["MME 200"] = dados_grafico["Close"].ewm(span=200, adjust=False).mean()
+            dados_grafico["MME 200"] = dados_grafico["Close"].ewm(span=200, adjust=False).mean()
             bb_graf = ta.volatility.BollingerBands(close=dados_grafico["Close"], window=20, window_dev=2)
             dados_grafico["Bollinger Sup."] = bb_graf.bollinger_hband()
             dados_grafico["Bollinger Inf."] = bb_graf.bollinger_lband()
