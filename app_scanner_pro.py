@@ -107,6 +107,13 @@ def analisar_ativos(tickers):
             preco_atual = float(close.iloc[-1])
             preco_anterior = float(close.iloc[-2])
             variacao_pct = ((preco_atual - preco_anterior) / preco_anterior) * 100
+            mme200 = ta.trend.EMAIndicator(close=close, window=200).ema_indicator().iloc[-1]
+            macd_val = ta.trend.MACD(close=close).macd_diff().iloc[-1]
+            macd_str = "Positivo" if macd_val > 0 else "Negativo"
+            bb = ta.volatility.BollingerBands(close=close, window=20, window_dev=2)
+            bb_sup = bb.bollinger_hband().iloc[-1]
+            bb_inf = bb.bollinger_lband().iloc[-1]
+            bb_str = "Banda Sup." if preco_atual >= bb_sup else ("Banda Inf." if preco_atual <= bb_inf else "Centro")
 
             # Classificação estatística neutra
             if rsi <= rsi_sobrevenda and preco_atual > mme50:
