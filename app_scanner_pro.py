@@ -219,7 +219,7 @@ if not df_res.empty:
             dados_grafico["MME 50"] = dados_grafico["Close"].ewm(span=50, adjust=False).mean()
             dados_grafico["MME 200"] = dados_grafico["Close"].ewm(span=200, adjust=False).mean()
 
-           st.line_chart(
+            st.line_chart(
                 dados_grafico[["Preço Fecho", "MME 20", "MME 50", "MME 200"]],
                 color=["#00FFAA", "#FFA500", "#FF4B4B", "#3399FF"]
             )
