@@ -199,9 +199,9 @@ if not df_res.empty:
     st.bar_chart(df_res.set_index("Ativo")["Var. (%)"])
 
     
-    # Secção de Gráfico Visual
+      # Secção de Gráfico Visual
     st.markdown("---")
-    st.subheader("📈 Visualização Gráfica do Ativo (6 Meses)")
+    st.subheader("📈 Visualização Gráfica do Ativo (1 Ano)")
 
     ativo_escolhido = st.selectbox(
         "Selecione um ativo da tabela acima para visualizar o preço e as médias móveis:",
@@ -209,7 +209,7 @@ if not df_res.empty:
     )
 
     if ativo_escolhido:
-        dados_grafico = yf.download(ativo_escolhido, period="6mo", interval="1d", progress=False)
+        dados_grafico = yf.download(ativo_escolhido, period="1y", interval="1d", progress=False)
         if not dados_grafico.empty:
             if isinstance(dados_grafico.columns, pd.MultiIndex):
                 dados_grafico.columns = dados_grafico.columns.get_level_values(0)
@@ -217,10 +217,11 @@ if not df_res.empty:
             dados_grafico["Preço Fecho"] = dados_grafico["Close"]
             dados_grafico["MME 20"] = dados_grafico["Close"].ewm(span=20, adjust=False).mean()
             dados_grafico["MME 50"] = dados_grafico["Close"].ewm(span=50, adjust=False).mean()
+            dados_grafico["MME 200"] = dados_grafico["Close"].ewm(span=200, adjust=False).mean()
 
-            st.line_chart(
-                dados_grafico[["Preço Fecho", "MME 20", "MME 50"]],
-                color=["#00FFAA", "#FFA500", "#FF4B4B"]
+           st.line_chart(
+                dados_grafico[["Preço Fecho", "MME 20", "MME 50", "MME 200"]],
+                color=["#00FFAA", "#FFA500", "#FF4B4B", "#3399FF"]
             )
 else:
     st.info("Clique em **Executar Triagem Completa** acima para carregar os dados do mercado selecionado.")
