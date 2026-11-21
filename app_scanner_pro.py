@@ -86,8 +86,8 @@ def analisar_ativos(tickers):
 
     for i, ticker in enumerate(tickers):
         try:
-            df = yf.download(ticker, period="6mo", interval="1d", progress=False)
-            if df.empty or len(df) < 55:
+            df = yf.download(ticker, period="1y", interval="1d", progress=False)
+            if df.empty or len(df) < 200:
                 barra_progresso.progress((i + 1) / total)
                 continue
 
