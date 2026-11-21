@@ -48,6 +48,13 @@ mercados = {
     "Criptomoedas": ["BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "XRP-USD", "ADA-USD", "LINK-USD", "AVAX-USD"],
     "ETFs Globais": ["SPY", "QQQ", "IWM", "EEM", "VWCE.DE", "IWDA.AS"],
     "Matérias-Primas": ["GC=F", "SI=F", "CL=F", "NG=F", "HG=F"],
+        "EUA (NYSE Blue Chips)": ["JPM", "V", "MA", "JNJ", "WMT", "PG", "DIS", "KO", "XOM", "BA"],
+    "EUA (NASDAQ Tech)": ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "AVGO", "NFLX", "AMD"],
+    "Londres (FTSE 100)": ["SHEL.L", "AZN.L", "HSBA.L", "ULVR.L", "BP.L", "RIO.L", "GSK.L", "DGE.L"],
+    "Paris (CAC 40)": ["MC.PA", "OR.PA", "TTE.PA", "AIR.PA", "SAN.PA", "SU.PA", "BNP.PA", "RMS.PA"],
+    "Madrid (IBEX 35)": ["SAN.MC", "ITX.MC", "IBE.MC", "BBVA.MC", "TEF.MC", "REP.MC", "FER.MC", "ACS.MC"],
+    "Frankfurt (DAX 40)": ["SAP.DE", "SIE.DE", "ALV.DE", "DTE.DE", "MBG.DE", "BMW.DE", "BAS.DE", "ADS.DE"],
+    "Tóquio (Nikkei 225)": ["7203.T", "6758.T", "9984.T", "8306.T", "6861.T", "8035.T", "7974.T", "9432.T"],
     "Lista Personalizada": []
 }
 
