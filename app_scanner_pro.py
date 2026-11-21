@@ -55,6 +55,7 @@ mercados = {
     "Madrid (IBEX 35)": ["SAN.MC", "ITX.MC", "IBE.MC", "BBVA.MC", "TEF.MC", "REP.MC", "FER.MC", "ACS.MC"],
     "Frankfurt (DAX 40)": ["SAP.DE", "SIE.DE", "ALV.DE", "DTE.DE", "MBG.DE", "BMW.DE", "BAS.DE", "ADS.DE"],
     "Tóquio (Nikkei 225)": ["7203.T", "6758.T", "9984.T", "8306.T", "6861.T", "8035.T", "7974.T", "9432.T"],
+      "Índices Mundiais": ["^GSPC", "^IXIC", "^DJI", "^FTSE", "^FCHI", "^GDAXI", "^IBEX", "^N225", "^BVSP", "PSI20.LS"],
     "Lista Personalizada": []
 }
 
