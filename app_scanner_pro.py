@@ -111,24 +111,31 @@ if not api_key:
 st.sidebar.header("⚙️ Configurações da Triagem")
 
 mercados = {
-     "Euronext Lisboa (PSI)": ["EDP.LS", "GALP.LS", "JMT.LS", "BCP.LS", "NOS.LS", "SON.LS", "RENE.LS", "ALTR.LS", "NVG.LS", "COR.LS"],
-    "EUA (Tech & Blue Chips)": ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "JPM", "V", "KO"],
-    "Brasil (B3)": ["PETR4.SA", "VALE3.SA", "ITUB4.SA", "BBDC4.SA", "BBAS3.SA", "WEGE3.SA", "RENT3.SA", "ABEV3.SA"],
-    "Criptomoedas": ["BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "XRP-USD", "ADA-USD", "LINK-USD", "AVAX-USD"],
-    "ETFs Globais": ["SPY", "QQQ", "IWM", "EEM", "VWCE.DE", "IWDA.AS"],
-    "Matérias-Primas": ["GC=F", "SI=F", "CL=F", "NG=F", "HG=F"],
-        "EUA (NYSE Blue Chips)": ["JPM", "V", "MA", "JNJ", "WMT", "PG", "DIS", "KO", "XOM", "BA"],
-    "EUA (NASDAQ Tech)": ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "AVGO", "NFLX", "AMD"],
-    "Londres (FTSE 100)": ["SHEL.L", "AZN.L", "HSBA.L", "ULVR.L", "BP.L", "RIO.L", "GSK.L", "DGE.L"],
-    "Paris (CAC 40)": ["MC.PA", "OR.PA", "TTE.PA", "AIR.PA", "SAN.PA", "SU.PA", "BNP.PA", "RMS.PA"],
-    "Madrid (IBEX 35)": ["SAN.MC", "ITX.MC", "IBE.MC", "BBVA.MC", "TEF.MC", "REP.MC", "FER.MC", "ACS.MC"],
-    "Frankfurt (DAX 40)": ["SAP.DE", "SIE.DE", "ALV.DE", "DTE.DE", "MBG.DE", "BMW.DE", "BAS.DE", "ADS.DE"],
-    "Tóquio (Nikkei 225)": ["7203.T", "6758.T", "9984.T", "8306.T", "6861.T", "8035.T", "7974.T", "9432.T"],
-      "Índices Mundiais": ["^GSPC", "^IXIC", "^DJI", "^FTSE", "^FCHI", "^GDAXI", "^IBEX", "^N225", "^BVSP", "PSI20.LS"],
+    "Euronext Lisboa (PSI)": ["EDP:ELI", "GALP:ELI", "JMT:ELI", "BCP:ELI", "NOS:ELI", "SON:ELI", "RENE:ELI", "ALTR:ELI"],
+    "EUA (NYSE Blue Chips)": ["JPM", "V", "MA", "JNJ", "WMT", "PG", "DIS", "KO"],
+    "EUA (NASDAQ Tech)": ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "AMD"],
+    "Londres (FTSE 100)": ["SHEL:LSE", "AZN:LSE", "HSBA:LSE", "ULVR:LSE", "BP:LSE", "RIO:LSE"],
+    "Paris (CAC 40)": ["MC:EPA", "OR:EPA", "TTE:EPA", "AIR:EPA", "SAN:EPA", "BNP:EPA"],
+    "Madrid (IBEX 35)": ["SAN:BME", "ITX:BME", "IBE:BME", "BBVA:BME", "TEF:BME", "REP:BME"],
+    "Frankfurt (DAX 40)": ["SAP:XETR", "SIE:XETR", "ALV:XETR", "DTE:XETR", "MBG:XETR", "BMW:XETR"],
+    "Brasil (B3)": ["PETR4:BVMF", "VALE3:BVMF", "ITUB4:BVMF", "BBDC4:BVMF", "BBAS3:BVMF", "WEGE3:BVMF"],
+    "Criptomoedas": ["BTC/USD", "ETH/USD", "SOL/USD", "BNB/USD", "XRP/USD", "ADA/USD"],
+    "ETFs & Índices EUA": ["SPY", "QQQ", "DIA", "IWM", "EEM", "GLD"],
     "Lista Personalizada": []
 }
-
-mercado_escolhido = st.sidebar.selectbox("Selecione o Mercado:", list(mercados.keys()))
+   def obter_dados_twelvedata(ticker, chave_api):
+    url = "https://api.twelvedata.com" + f"/time_series?symbol={ticker}&interval=1day&outputsize=220&apikey={chave_api}"
+    resp = requests.get(url).json()
+    if "values" not in resp:
+        return pd.DataFrame()
+    df = pd.DataFrame(resp["values"])
+    df = df.iloc[::-1].reset_index(drop=True)
+    for col in ["open", "high", "low", "close"]:
+        df[col] = df[col].astype(float)
+    df.rename(columns={"open": "Open", "high": "High", "low": "Low", "close": "Close", "datetime": "Date"}, inplace=True)
+    df.set_index("Date", inplace=True)
+    time.sleep(8)
+    return df
 
 if mercado_escolhido == "Lista Personalizada":
     ativos_texto = st.sidebar.text_area(
@@ -161,9 +168,9 @@ def analisar_ativos(tickers):
     barra_progresso = st.progress(0)
     total = len(tickers)
 
-    for i, ticker in enumerate(tickers):
+      for i, ticker in enumerate(tickers):
         try:
-            df = yf.download(ticker, period="1y", interval="1d", progress=False)
+            df = obter_dados_twelvedata(ticker, api_key)
             if df.empty or len(df) < 200:
                 barra_progresso.progress((i + 1) / total)
                 continue
@@ -285,12 +292,9 @@ if not df_res.empty:
         df_res["Ativo"].tolist()
     )
 
-    if ativo_escolhido:
-        dados_grafico = yf.download(ativo_escolhido, period="1y", interval="1d", progress=False)
+      if ativo_escolhido:
+        dados_grafico = obter_dados_twelvedata(ativo_escolhido, api_key)
         if not dados_grafico.empty:
-            if isinstance(dados_grafico.columns, pd.MultiIndex):
-                dados_grafico.columns = dados_grafico.columns.get_level_values(0)
-
             dados_grafico["Preço Fecho"] = dados_grafico["Close"]
             dados_grafico["MME 20"] = dados_grafico["Close"].ewm(span=20, adjust=False).mean()
             dados_grafico["MME 50"] = dados_grafico["Close"].ewm(span=50, adjust=False).mean()
