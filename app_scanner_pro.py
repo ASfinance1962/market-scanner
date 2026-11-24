@@ -1,8 +1,10 @@
 import streamlit as st
-import yfinance as yf
 import pandas as pd
 import ta
 import requests
+import time
+from datetime import datetime, timezone
+from supabase import create_client
 
 # Configuração da página
 st.set_page_config(
