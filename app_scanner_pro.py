@@ -39,7 +39,74 @@ st.warning(
 
 st.title("📊 MarketScanner Pro — Rastreador Quantitativo Multi-Ativos")
 st.markdown("Analise rapidamente ações globais e criptomoedas com base em indicadores técnicos objetivos (dados diários para fins exclusivamente educacionais).")
+# --- CONFIGURAÇÃO SUPABASE (7 DIAS GRÁTIS POR UTILIZADOR) ---
+SUPABASE_URL = "https://arviymkprercxnlpauax.supabase.co"
+SUPABASE_KEY = "sb_publishable_8oB1oixZbqZnW7fPobAVwA_XcadD2Cy"
+LINK_PAGAMENTO_STRIPE = "https://stripe.com"
 
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+if "utilizador" not in st.session_state:
+    st.session_state["utilizador"] = None
+
+if not st.session_state["utilizador"]:
+    st.sidebar.header("🔐 Acesso à Plataforma")
+    aba = st.sidebar.radio("Escolha uma opção:", ["Criar Conta (7 Dias Grátis)", "Entrar"])
+    email = st.sidebar.text_input("E-mail:")
+    password = st.sidebar.text_input("Palavra-passe (mín. 6 caracteres):", type="password")
+
+    if aba == "Criar Conta (7 Dias Grátis)":
+        if st.sidebar.button("Começar Teste Gratuito de 7 Dias", type="primary"):
+            try:
+                res = supabase.auth.sign_up({"email": email, "password": password})
+                if res.user:
+                    supabase.table("perfis").insert({"id": res.user.id, "email": email}).execute()
+                    st.session_state["utilizador"] = res.user
+                    st.rerun()
+            except Exception as e:
+                st.sidebar.error(f"Erro ao criar conta: {e}")
+    else:
+        if st.sidebar.button("Entrar", type="primary"):
+            try:
+                res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+                if res.user:
+                    st.session_state["utilizador"] = res.user
+                    st.rerun()
+            except Exception:
+                st.sidebar.error("E-mail ou palavra-passe incorretos.")
+
+    st.info("👋 **Bem-vindo ao MarketScanner Pro!** Crie a sua conta gratuita na barra lateral (à esquerda) para desbloquear **7 dias de acesso livre**.")
+    st.stop()
+
+user_id = st.session_state["utilizador"].id
+dados_perfil = supabase.table("perfis").select("*").eq("id", user_id).execute()
+
+if dados_perfil.data:
+    perfil = dados_perfil.data[0]
+    data_criacao = datetime.fromisoformat(perfil["criado_em"].replace("Z", "+00:00"))
+    dias_passados = (datetime.now(timezone.utc) - data_criacao).days
+    dias_restantes = max(0, 7 - dias_passados)
+    e_assinante = perfil["assinante"]
+    st.sidebar.success(f"👤 {perfil['email']}")
+    if st.sidebar.button("Terminar Sessão"):
+        st.session_state["utilizador"] = None
+        st.rerun()
+
+    if not e_assinante and dias_passados >= 7:
+        st.error("🔒 **O seu período experimental gratuito de 7 dias terminou.**")
+        st.markdown(f"Para continuar a utilizar o **MarketScanner Pro** sem limites, ative a sua assinatura mensal aqui:\n\n👉 **[Subscrever Plano Mensal]({LINK_PAGAMENTO_STRIPE})**")
+        st.stop()
+    elif not e_assinante:
+        st.info(f"⏳ **Período Experimental:** Restam **{dias_restantes} dia(s)** de acesso gratuito.")
+
+st.sidebar.markdown("---")
+st.sidebar.header("🔑 Dados de Mercado (Chave Gratuita)")
+api_key = st.sidebar.text_input("Sua API Key (Twelve Data):", type="password")
+st.sidebar.caption("Obtenha a sua chave gratuita em [twelvedata.com](https://twelvedata.com) (800 pedidos grátis/dia).")
+
+if not api_key:
+    st.warning("🔑 Cole a sua **API Key gratuita da Twelve Data** na barra lateral para carregar os dados de mercado.")
+    st.stop()
 # Barra Lateral (Configurações do Usuário)
 st.sidebar.header("⚙️ Configurações da Triagem")
 
