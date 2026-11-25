@@ -123,7 +123,8 @@ mercados = {
     "ETFs & Índices EUA": ["SPY", "QQQ", "DIA", "IWM", "EEM", "GLD"],
     "Lista Personalizada": []
 }
-   def obter_dados_twelvedata(ticker, chave_api):
+
+def obter_dados_twelvedata(ticker, chave_api):
     url = "https://api.twelvedata.com" + f"/time_series?symbol={ticker}&interval=1day&outputsize=220&apikey={chave_api}"
     resp = requests.get(url).json()
     if "values" not in resp:
