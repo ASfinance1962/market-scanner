@@ -136,7 +136,7 @@ def obter_dados_twelvedata(ticker, chave_api):
     df.rename(columns={"open": "Open", "high": "High", "low": "Low", "close": "Close", "datetime": "Date"}, inplace=True)
     df.set_index("Date", inplace=True)
     time.sleep(8)
-     return df
+    return df
 
 mercado_escolhido = st.sidebar.selectbox("Selecione o Mercado:", list(mercados.keys()))
 
