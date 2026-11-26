@@ -136,12 +136,14 @@ def obter_dados_twelvedata(ticker, chave_api):
     df.rename(columns={"open": "Open", "high": "High", "low": "Low", "close": "Close", "datetime": "Date"}, inplace=True)
     df.set_index("Date", inplace=True)
     time.sleep(8)
-    return df
+     return df
+
+mercado_escolhido = st.sidebar.selectbox("Selecione o Mercado:", list(mercados.keys()))
 
 if mercado_escolhido == "Lista Personalizada":
     ativos_texto = st.sidebar.text_area(
         "Digite os códigos (tickers) separados por vírgula:",
-        value="EDP.LS, AAPL, PETR4.SA, BTC-USD"
+        value="EDP:ELI, AAPL, PETR4:BVMF, BTC/USD"
     )
     lista_ativos = [x.strip().upper() for x in ativos_texto.split(",") if x.strip()]
 else:
@@ -169,7 +171,7 @@ def analisar_ativos(tickers):
     barra_progresso = st.progress(0)
     total = len(tickers)
 
-      for i, ticker in enumerate(tickers):
+    for i, ticker in enumerate(tickers):
         try:
             df = obter_dados_twelvedata(ticker, api_key)
             if df.empty or len(df) < 200:
