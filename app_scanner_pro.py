@@ -285,8 +285,7 @@ if not df_res.empty:
     st.subheader("📊 Comparação de Variação Diária (%)")
     st.bar_chart(df_res.set_index("Ativo")["Var. (%)"])
 
-    
-      # Secção de Gráfico Visual
+    # Secção de Gráfico Visual
     st.markdown("---")
     st.subheader("📈 Visualização Gráfica do Ativo (1 Ano)")
 
@@ -295,14 +294,12 @@ if not df_res.empty:
         df_res["Ativo"].tolist()
     )
 
-      if ativo_escolhido:
+    if ativo_escolhido:
         dados_grafico = obter_dados_twelvedata(ativo_escolhido, api_key)
         if not dados_grafico.empty:
             dados_grafico["Preço Fecho"] = dados_grafico["Close"]
             dados_grafico["MME 20"] = dados_grafico["Close"].ewm(span=20, adjust=False).mean()
             dados_grafico["MME 50"] = dados_grafico["Close"].ewm(span=50, adjust=False).mean()
-            dados_grafico["MME 200"] = dados_grafico["Close"].ewm(span=200, adjust=False).mean()
-
             dados_grafico["MME 200"] = dados_grafico["Close"].ewm(span=200, adjust=False).mean()
             bb_graf = ta.volatility.BollingerBands(close=dados_grafico["Close"], window=20, window_dev=2)
             dados_grafico["Bollinger Sup."] = bb_graf.bollinger_hband()
