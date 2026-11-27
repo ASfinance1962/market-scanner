@@ -153,17 +153,15 @@ st.sidebar.subheader("📐 Parâmetros Técnicos")
 rsi_sobrevenda = st.sidebar.slider("Limite RSI Sobre-venda:", 15, 45, 35)
 rsi_sobrecompra = st.sidebar.slider("Limite RSI Sobre-compra:", 55, 85, 70)
 
-perfil_risco = st.sidebar.selectbox(
-    "Multiplicador ATR (Gestão de Risco):",
-    ["Conservador (Stop 1.5x | Alvo 2.0x)", "Moderado (Stop 2.0x | Alvo 3.0x)", "Agressivo (Stop 2.5x | Alvo 4.5x)"]
-)
+st.sidebar.subheader("🛡️ Gestão de Risco (ATR)")
+mult_stop = st.sidebar.slider("Multiplicador Stop (x ATR):", 0.5, 5.0, 1.5, step=0.1)
+mult_alvo = st.sidebar.slider("Multiplicador Alvo (x ATR):", 1.0, 10.0, 3.0, step=0.5)
 
-if "Conservador" in perfil_risco:
-    mult_stop, mult_alvo = 1.5, 2.0
-elif "Moderado" in perfil_risco:
-    mult_stop, mult_alvo = 2.0, 3.0
-else:
-    mult_stop, mult_alvo = 2.5, 4.5
+st.sidebar.markdown("---")
+st.sidebar.subheader("📲 Alertas via Telegram (Opcional)")
+tg_token = st.sidebar.text_input("Token do Bot Telegram:", type="password")
+tg_chat_id = st.sidebar.text_input("Seu Chat ID Telegram:")
+st.sidebar.caption("Crie o seu bot grátis no **@BotFather** e veja o seu ID no **@userinfobot**.")
 
 # Função de análise técnica
 def analisar_ativos(tickers):
