@@ -378,4 +378,22 @@ with st.expander("💬 Enviar Opinião ou Sugestão (Versão Beta)"):
                 except Exception:
                     st.error("❌ Erro de ligação ao enviar o formulário.")
             else:
-                st.warning("⚠️ Por favor, selecione um valor ou escreva uma sugestão antes de enviar.")      
+                st.warning("⚠️ Por favor, selecione um valor ou escreva uma sugestão antes de enviar.") 
+           # Política de Privacidade e Proteção de Dados (RGPD)
+with st.expander("🔒 Política de Privacidade e Proteção de Dados (RGPD)"):
+    st.markdown("""
+    **1. Responsável pelo Tratamento**  
+    A plataforma **MarketScanner Pro** é gerida por **António Antunes**, com contacto através do e-mail **ascamell007@gmail.com**.
+
+    **2. Dados Recolhidos e Finalidade**  
+    * **E-mail e Data de Registo:** Recolhidos exclusivamente para criar a sua conta de acesso, contabilizar o período experimental gratuito de 7 dias e gerir o estado da assinatura.  
+    * **Chave API (Twelve Data) e Credenciais Telegram:** Inseridas pelo próprio utilizador apenas durante a sessão ativa no navegador; **não** são gravadas nas nossas bases de dados.  
+    * **Dados de Pagamento:** Caso subscreva o plano mensal, o pagamento é processado diretamente pela **Stripe**; não armazenamos dados de cartões bancários.
+
+    **3. Armazenamento e Segurança**  
+    Os dados de registo são armazenados de forma encriptada na infraestrutura da **Supabase** (servidores localizados na União Europeia — Irlanda) e nunca são vendidos ou partilhados com terceiros para fins publicitários.
+
+    **4. Direitos do Utilizador (RGPD)**  
+    Nos termos do Regulamento Geral sobre a Proteção de Dados (UE) 2016/679, pode solicitar a consulta, retificação ou eliminação definitiva da sua conta e respetivos dados a qualquer momento, enviando um e-mail para **ascamell007@gmail.com**.
+    """)
+     
