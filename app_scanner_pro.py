@@ -289,23 +289,20 @@ if not df_res.empty:
             else:
                 linhas = [f"🚨 *Alertas Técnicos — {mercado_escolhido}*\n"]
                 for _, row in sinais.iterrows():
-                    linhas.append(
-                        f"• *{row['Ativo']}*: {row['Leitura Estatística']}\n"
-                        f"  Preço: {row['Preço Ref.']} | RSI: {row['RSI (14)']} | Stop ATR: {row['Ref. Stop (ATR)']} | Alvo ATR: {row['Ref. Alvo (ATR)']}"
-                    )
+                    linhas.append(f"• *{row['Ativo']}*: {row['Leitura Estatística']} | Preço: {row['Preço Ref.']} | RSI: {row['RSI (14)']} | Stop: {row['Ref. Stop (ATR)']} | Alvo: {row['Ref. Alvo (ATR)']}")
                 linhas.append("\n_Nota: Triagem estatística educacional (não constitui recomendação)._")
-                                              mensagem = "\n".join(linhas)
+                mensagem = "\n".join(linhas)
 
             resp_tg = requests.post(
-                "https://api.telegram.org" + f"/bot{tg_token}/sendMessage",
+                             "https://api.telegram.org" + f"/bot{tg_token}/sendMessage",
+
                 data={"chat_id": tg_chat_id, "text": mensagem, "parse_mode": "Markdown"}
             )
             if resp_tg.status_code == 200:
-
-
                 st.success("✅ Alertas enviados com sucesso para o seu Telegram!")
             else:
                 st.error("❌ Erro ao enviar para o Telegram. Verifique o Token e o Chat ID.")
+
     # Gráfico de Barras de Variação Diária
     st.markdown("---")
     st.subheader("📊 Comparação de Variação Diária (%)")
