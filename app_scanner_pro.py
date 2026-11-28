@@ -275,7 +275,8 @@ if not df_res.empty:
     st.download_button(
         label="📥 Descarregar Tabela (CSV / Excel)",
         data=csv,
-        file_name=f"triagem_{mercado_escolhido.split().lower()}.csv",
+             file_name=f"triagem_{mercado_escolhido.split()[0].lower()}.csv",
+
         mime="text/csv"
     )
 
